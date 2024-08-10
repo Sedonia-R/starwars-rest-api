@@ -10,7 +10,6 @@ class User(db.Model):
     favorites = db.relationship("Favorites", backref="user")
 
     def __init__(self, user_name, email):
-        self.id=id
         self.user_name = user_name
         self.email = email
         db.session.add(self)
@@ -48,13 +47,10 @@ class Planets(db.Model):
     population = db.Column(db.Integer, nullable=False)
     gravity = db.Column(db.String(250), nullable=False)
     climate = db.Column(db.String(250), nullable=False)
-    # favorites_id = db.Column(db.Integer, db.ForeignKey('favorites.id'))
-    # favorites = db.relationship(Favorites)
-    # user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     favorites = db.relationship("Favorites", backref="planet")
 
     def __init__(self, url, diameter, rotation_period, orbital_period, 
-                 name, terrain, population, gravity, climate, user_id):
+                 name, terrain, population, gravity, climate):
         self.url = url
         self.diameter = diameter
         self.rotation_period = rotation_period
@@ -64,7 +60,6 @@ class Planets(db.Model):
         self.population = population
         self.gravity = gravity
         self.climate = climate
-        self.user_id = user_id
         db.session.add(self)
         db.session.commit()
     
@@ -80,7 +75,6 @@ class Planets(db.Model):
             "population": self.population,
             "gravity": self.gravity,
             "climate": self.climate,
-            "user_id": self.user_id,
         }
 
 class Characters(db.Model):
@@ -94,13 +88,10 @@ class Characters(db.Model):
     height = db.Column(db.Integer, nullable=False)
     mass = db.Column(db.Integer, nullable=False)
     gender = db.Column(db.String(250), nullable=False)
-    # favorites_id = db.Column(db.Integer, db.ForeignKey('favorites.id'))
-    # favorites = db.relationship(Favorites)
-    # user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     favorites = db.relationship("Favorites", backref="character")
 
     def __init__(self, url, name, hair_color, skin_color, 
-                 eye_color, birth_year, height, mass, gender, user_id):
+                 eye_color, birth_year, height, mass, gender):
         self.url = url
         self.name = name
         self.hair_color = hair_color
@@ -110,7 +101,6 @@ class Characters(db.Model):
         self.height = height
         self.mass = mass
         self.gender = gender
-        self.user_id = user_id
         db.session.add(self)
         db.session.commit()
     
@@ -126,7 +116,6 @@ class Characters(db.Model):
             "height": self.height,
             "mass": self.mass,
             "gender": self.gender,
-            "user_id": self.user_id,
         }
 
 class Vehicles(db.Model):
@@ -139,20 +128,16 @@ class Vehicles(db.Model):
     model = db.Column(db.String(250), nullable=False)
     crew = db.Column(db.Integer, nullable=False)
     cost_in_credits = db.Column(db.Integer, nullable=False)
-    length = db.Column(db.Integer, nullable=False)
+    length = db.Column(db.Float, nullable=False)
     passengers = db.Column(db.Integer, nullable=False)
     max_atmosphering_speed = db.Column(db.Integer, nullable=False)
     cargo_capacity = db.Column(db.Integer, nullable=False)
     consumables = db.Column(db.String(250), nullable=False)
-    # favorites_id = db.Column(db.Integer, db.ForeignKey('favorites.id'))
-    # favorites = db.relationship(Favorites)
-    # user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     favorites = db.relationship("Favorites", backref="vehicle")
 
     def __init__(self, url, name, vehicle_class, manufacturer, 
                  model, crew, cost_in_credits, length, passengers, 
-                 max_atmosphering_speed, cargo_capacity, consumables, 
-                 user_id):
+                 max_atmosphering_speed, cargo_capacity, consumables):
         self.url = url
         self.name = name
         self.vehicle_class = vehicle_class
@@ -165,7 +150,6 @@ class Vehicles(db.Model):
         self.max_atmosphering_speed = max_atmosphering_speed
         self.cargo_capacity = cargo_capacity
         self.consumables = consumables
-        self.user_id = user_id
         db.session.add(self)
         db.session.commit()
     
@@ -183,18 +167,16 @@ class Vehicles(db.Model):
             "max_atmosphering_speed": self.max_atmosphering_speed,
             "cargo_capacity": self.cargo_capacity,
             "consumables": self.consumables,
-            "user_id": self.user_id,
         }
 
 class Favorites(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.String(250), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     planet_id = db.Column(db.Integer, db.ForeignKey('planets.id'))
     character_id = db.Column(db.Integer, db.ForeignKey('characters.id'))
     vehicle_id = db.Column(db.Integer, db.ForeignKey('vehicles.id'))
 
-    def __init__(self, user_id, planet_id, character_id, vehicle_id):
+    def __init__(self, user_id, planet_id=None, character_id=None, vehicle_id=None):
         self.user_id = user_id
         self.planet_id = planet_id
         self.character_id = character_id
@@ -208,7 +190,5 @@ class Favorites(db.Model):
             "user_id": self.user_id,
             "character_id": self.character_id,
             "planet_id": self.planet_id,
-        #     **self.planet.serialize()
-        #     **self.character.serialize()
-        #     **self.vehicle.serialize()
+            "vehicle_id": self.vehicle_id,
         }
