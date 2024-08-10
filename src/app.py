@@ -216,6 +216,30 @@ def get_favorite_vehicle():
             )
     return jsonify(favorite_vehicles_dictionaries), 200
 
+@app.route("/favorites", methods=['GET'])
+def get_favorite():
+    favorites = Favorites.query.all()
+    favorite_dictionaries = []
+    for favorite in favorites:
+        favorite_dictionaries.append(
+            favorite.serialize()
+        )
+    return jsonify(favorite_dictionaries), 200
+
+@app.route("/favorites/<int:id>", methods=['DELETE'])
+def delete_favorite(id):
+    favorites = Favorites.query.all()
+    for favorite in favorites:
+        if favorite.id is None:
+            return jsonify({
+                "message": "Could not locate requested favorite character, are you sure you're using the correct favorites id?"
+            }), 404
+        elif favorite.id == id:
+            if request.method == 'DELETE':
+                db.session.delete(favorite)
+                db.session.commit()
+                return jsonify({"messsage": "Favorite was successfully deleted."}), 200
+
 @app.route('/favorites/characters/<int:id>', methods=['GET', 'DELETE'])
 def handle_favorite_character(id):
     favorites = Favorites.query.all()
@@ -266,58 +290,39 @@ def handle_favorite_vehicle(id):
                 db.session.delete(favorite)
                 db.session.commit()
                 return jsonify({"messsage": "Favorite vehicle was successfully deleted."}), 200
-            
-@app.route("/favorites/vehicles", methods=['POST'])
-def add_favorite_vehicle():
-    vehicle_id = Vehicles.query.get('vehicle_id')
-    user_id = User.query.get('user_id')
-    if request.method == "POST":
-        favorite = Favorites(
-            vehicle_id = vehicle_id,
-            user_id = user_id
-        )
-        db.session.add(favorite)
-        db.session.commit()
-        return jsonify(favorite.serialize()), 201
 
-# @app.route("/favorites/vehicles/<int:vehicle_id>", methods=['POST'])
-# def add_favorite_vehicle(vehicle_id):
-#     user_id = request.json.get('user_id')
-#     favorite = Favorites(
-#         vehicle_id = vehicle_id,
-#         user_id = user_id
-#     )
-#     db.session.add(favorite)
-#     db.session.commit()
-#     return jsonify(favorite.serialize()), 201
+@app.route("/favorites/vehicles/<int:vehicle_id>", methods=['POST'])
+def add_favorite_vehicle(vehicle_id):
+    user_id = request.json.get('user_id')
+    favorite = Favorites(
+        vehicle_id = vehicle_id,
+        user_id = user_id
+    )
+    db.session.add(favorite)
+    db.session.commit()
+    return jsonify(favorite.serialize()), 201
 
-# @app.route('/favorites/planets/<int:planet_id>', methods=['DELETE'])
-# def handle_delete_favorite_planet():
-#     # user_id = request.json.get('user_id')
-#     body = request.json
-#     planet = Favorites.query.get(body["planet_id"])
-#     if planet is None:
-#         return jsonify({
-#             "message": "Could not locate requested favorite planet."
-#         }), 404
-#     db.session.delete(planet)
-#     db.session.commit()
+@app.route("/favorites/characters/<int:character_id>", methods=['POST'])
+def add_favorite_character(character_id):
+    user_id = request.json.get('user_id')
+    favorite = Favorites(
+        character_id = character_id,
+        user_id = user_id
+    )
+    db.session.add(favorite)
+    db.session.commit()
+    return jsonify(favorite.serialize()), 201
 
-#     return jsonify({"messsage": "Favorite planet was successfully deleted."}), 200
-
-# @app.route('/favorites/vehicles/<int:vehicle_id>', methods=['DELETE'])
-# def handle_delete_favorite_vehicle():
-#     body = request.json
-#     vehicle = Favorites.query.get(body["vehicle_id"])
-#     if vehicle is None:
-#         return jsonify({
-#             "message": "Could not locate requested favorite vehicle."
-#         }), 404
-#     db.session.delete(vehicle)
-#     db.session.commit()
-
-#     return jsonify({"messsage": "Favorite vehicle was successfully deleted."}), 200
-
+@app.route("/favorites/planets/<int:planet_id>", methods=['POST'])
+def add_favorite_planet(planet_id):
+    user_id = request.json.get('user_id')
+    favorite = Favorites(
+        planet_id = planet_id,
+        user_id = user_id
+    )
+    db.session.add(favorite)
+    db.session.commit()
+    return jsonify(favorite.serialize()), 201
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
